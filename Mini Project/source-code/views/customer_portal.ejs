@@ -1,0 +1,43 @@
+<%- include('layout/header', { title: 'My Account', pageTitle: 'My Account', activePage: 'account' }) %>
+
+<div class="card">
+  <div class="card-header" style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+    <div class="card-title">Customer profile</div>
+    <a href="/change-password" class="btn btn-secondary btn-sm">Change Password</a>
+  </div>
+  <div class="card-body">
+    <h3><%= customer.name %></h3>
+    <p><%= customer.email %> · <%= customer.phone %></p>
+    <% if (customer.company) { %><p><%= customer.company %></p><% } %>
+    <% if (customer.address) { %><p><%= customer.address %></p><% } %>
+    <p>Status: <strong><%= customer.status %></strong></p>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><div class="card-title">Interaction history</div></div>
+  <div class="card-body">
+    <% if (interactions && interactions.length > 0) { %>
+      <% interactions.forEach(item => { %>
+        <p><strong><%= item.interaction_date %> · <%= item.type %></strong><br><%= item.description %></p>
+      <% }); %>
+    <% } else { %>
+      <p>No interactions have been recorded.</p>
+    <% } %>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><div class="card-title">Follow-ups</div></div>
+  <div class="card-body">
+    <% if (followups && followups.length > 0) { %>
+      <% followups.forEach(item => { %>
+        <p><strong><%= item.follow_up_date %> · <%= item.status %></strong><br><%= item.reason %></p>
+      <% }); %>
+    <% } else { %>
+      <p>No follow-ups have been recorded.</p>
+    <% } %>
+  </div>
+</div>
+
+<%- include('layout/footer') %>

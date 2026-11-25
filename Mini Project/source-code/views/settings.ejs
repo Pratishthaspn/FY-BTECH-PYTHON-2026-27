@@ -1,0 +1,178 @@
+<%- include('layout/header', { title: 'Settings', pageTitle: 'Application Settings', activePage: 'settings' }) %>
+
+<div style="max-width: 720px;">
+
+  <!-- BUSINESS PROFILE SETTINGS -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+        </svg>
+        <span>Business Information</span>
+      </div>
+    </div>
+
+    <form action="/settings" method="POST" id="businessSettingsForm">
+      <input type="hidden" name="_csrf_token" value="<%= csrfToken %>">
+      <div class="card-body">
+
+        <div class="form-group">
+          <label class="form-label" for="setting_business_name">Business Name <span class="required">*</span></label>
+          <input type="text" id="setting_business_name" name="business_name" class="form-control" value="<%= settings.business_name %>" required>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="setting_owner_email">Contact Email <span class="required">*</span></label>
+            <input type="email" id="setting_owner_email" name="owner_email" class="form-control" value="<%= settings.owner_email %>" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="setting_owner_phone">Contact Phone <span class="required">*</span></label>
+            <input type="tel" id="setting_owner_phone" name="owner_phone" class="form-control" value="<%= settings.owner_phone %>" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="setting_currency">Currency Symbol</label>
+            <input type="text" id="setting_currency" name="currency" class="form-control" value="<%= settings.currency || '₹' %>" style="max-width: 140px;">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="setting_theme">Interface Theme</label>
+            <select id="setting_theme" name="theme" class="form-control">
+              <option value="light" <%= settings.theme === 'light' ? 'selected' : '' %>>Modern Clean SaaS Light</option>
+              <option value="dark" <%= settings.theme === 'dark' ? 'selected' : '' %>>Modern SaaS Dark</option>
+              <option value="indigo" <%= settings.theme === 'indigo' ? 'selected' : '' %>>Indigo Professional</option>
+            </select>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="card-footer">
+        <button type="submit" class="btn btn-primary">Save Settings</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ACCOUNT PASSWORD -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        </svg>
+        <span>Account Password</span>
+      </div>
+    </div>
+    <div class="card-body" style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+      <div>
+        <div style="font-weight: 600; color: var(--text-main); margin-bottom: 2px;">Update Your Sign-In Password</div>
+        <div style="font-size: 0.88rem; color: var(--text-muted);">
+          Signed in as <strong><%= currentUser ? currentUser.email : 'Admin' %></strong>.
+        </div>
+      </div>
+      <a href="/change-password" class="btn btn-primary">Change / Reset Password</a>
+    </div>
+  </div>
+
+  <!-- USER ACCOUNTS -->
+  <div class="card">
+    <div class="card-header"><div class="card-title">User Accounts</div></div>
+    <div class="card-body">
+      <form action="/admin/users" method="POST">
+        <input type="hidden" name="_csrf_token" value="<%= csrfToken %>">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="account_role">Role</label>
+            <select class="form-control" id="account_role" name="role" required>
+              <option value="staff">Staff</option>
+              <option value="customer">Customer</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="account_email">Email (admin/staff accounts)</label>
+            <input class="form-control" id="account_email" name="email" type="email">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="account_customer_email">Existing customer email (customer accounts)</label>
+            <input class="form-control" id="account_customer_email" name="customer_email" type="email">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="account_password">Temporary password (12+ characters)</label>
+            <input class="form-control" id="account_password" name="password" type="password" minlength="12" required>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Create account</button>
+      </form>
+
+      <h4 style="margin: 24px 0 10px;">Current accounts</h4>
+      <% if (users && users.length > 0) { %>
+        <% users.forEach(user => { %>
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 0; border-top: 1px solid var(--border-light);">
+            <div>
+              <strong><%= user.email %></strong><br>
+              <span><%= capitalize(user.role) %><% if (user.customer_name) { %> · <%= user.customer_name %><% } %></span>
+            </div>
+            <form action="/admin/users/<%= user.id %>/reset-password" method="POST" style="display: flex; gap: 8px; align-items: center;">
+              <input type="hidden" name="_csrf_token" value="<%= csrfToken %>">
+              <input class="form-control" type="password" name="password" minlength="12" placeholder="Temporary password" aria-label="Temporary password for <%= user.email %>" required>
+              <button class="btn btn-secondary" type="submit">Reset</button>
+            </form>
+          </div>
+        <% }); %>
+      <% } else { %>
+        <p>No accounts have been created.</p>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- CUSTOMER DATA EXPORT -->
+  <div class="card">
+    <div class="card-header"><div class="card-title">Customer Data Export</div></div>
+    <div class="card-body">
+      <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 14px;">Download all customer records as an Excel workbook (.xlsx).</p>
+      <a href="/download-customers.xlsx" class="btn btn-primary">Download Customer List (.xlsx)</a>
+    </div>
+  </div>
+
+  <!-- DEMO TOOLS: RESET SAMPLE DATA -->
+  <div class="card demo-reset-card">
+    <div class="card-header demo-reset-header">
+      <div class="card-title demo-reset-title">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+        <span>Demo Utility: Re-seed Sample Data</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 14px; line-height: 1.5;">
+        Need to reset the database back to clean sample data?
+        Clicking this button repopulates the 10 standard demo customers, 15+ interactions, and 8+ scheduled follow-ups.
+      </p>
+      <form action="/reset-database" method="POST" onsubmit="return confirm('Reset all data back to the default sample records? Any newly added test records will be refreshed.');">
+        <input type="hidden" name="_csrf_token" value="<%= csrfToken %>">
+        <button type="submit" class="btn btn-secondary">
+          ↻ Reset Database to Sample Records
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- System Info Card -->
+  <div class="card">
+    <div class="card-body" style="font-size: 0.84rem; color: var(--text-muted); line-height: 1.6;">
+      <div style="font-weight: 600; color: var(--text-main); margin-bottom: 4px;">CRM Application</div>
+      <div>Technology Stack: Node.js, Express, EJS, Vanilla CSS3 & JS</div>
+      <div>Persistent workspace storage with role-based access control, customer portal, and Excel export.</div>
+    </div>
+  </div>
+
+</div>
+
+<%- include('layout/footer') %>
